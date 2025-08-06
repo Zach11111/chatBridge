@@ -14,7 +14,9 @@ client.on("messageCreate", async (message) => {
         const referenced = await message.fetchReference();
         const replyAuthor = referenced.member?.displayName || referenced.author.username;
         const rawContent = referenced.content || "[embed/attachment]";
-        const replyContent = rawContent.replace(/^`Replying to @.*?: "(.*)"`\n?/s, "$1").slice(0, 100);
+        const cleanedContent = rawContent.replace(/^`Replying to @.*?: ".*?"`\n?/s, "").trim();
+        const replyContent = cleanedContent.slice(0, 100);
+
         replyText = `\`Replying to @${replyAuthor}: "${replyContent}"\``;
       } catch (err) {
         Logger.warn("Failed to fetch reply reference:", err);
