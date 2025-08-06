@@ -28,8 +28,12 @@ client.on("messageCreate", async (message) => {
 
       const webhookClient = new (await import("discord.js")).WebhookClient({ url: server.webhook });
 
+      const filteredContent = message.content
+        .replace(/@everyone/g, "@\u200Beveryone")
+        .replace(/@here/g, "@\u200Bhere");
+
       webhookClient.send({
-        content: `${replyText}\n${message.content}`,
+        content: `${replyText}\n${filteredContent}`,
         username: message.member?.displayName || message.author.username,
         avatarURL: message.author.displayAvatarURL(),
         files: message.attachments.map(att => att.url),
