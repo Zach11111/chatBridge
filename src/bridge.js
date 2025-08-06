@@ -14,7 +14,7 @@ client.on("messageCreate", async (message) => {
         const referenced = await message.fetchReference();
         const replyAuthor = referenced.member?.displayName || referenced.author.username;
         const replyContent = referenced.content?.slice(0, 100) || "[embed/attachment]";
-        replyText = `\`Replying to **@${replyAuthor}:** "${replyContent}"\``;
+        replyText = `\`Replying to @${replyAuthor}: "${replyContent}"\``;
       } catch (err) {
         Logger.warn("Failed to fetch reply reference:", err);
       }
@@ -26,7 +26,7 @@ client.on("messageCreate", async (message) => {
       const webhookClient = new (await import("discord.js")).WebhookClient({ url: server.webhook });
 
       webhookClient.send({
-        content: `${replyText}${message.content}`,
+        content: `${replyText}\n${message.content}`,
         username: message.member?.displayName || message.author.username,
         avatarURL: message.author.displayAvatarURL(),
         files: message.attachments.map(att => att.url),
