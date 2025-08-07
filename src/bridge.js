@@ -23,6 +23,10 @@ client.on("messageCreate", async (message) => {
       }
     }
 
+    if (message.stickers.size > 0 && message.content === "") {
+      return;
+    }
+
     for (const server of servers) {
       if (server.channelId === message.channel.id) continue;
 
