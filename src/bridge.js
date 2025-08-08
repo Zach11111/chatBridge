@@ -1,4 +1,5 @@
 import Logger from "garylog";
+import { WebhookClient } from "discord.js";
 
 import { client } from "./client.js";
 import { servers } from "./utils.js";
@@ -30,15 +31,36 @@ client.on("messageCreate", async (message) => {
     for (const server of servers) {
       if (server.channelId === message.channel.id) continue;
 
-      const webhookClient = new (await import("discord.js")).WebhookClient({ url: server.webhook });
+      const webhookClient = new WebhookClient({ url: server.webhook });
 
       const filteredContent = message.content
         .replace(/@everyone/g, "@\u200Beveryone")
         .replace(/@here/g, "@\u200Bhere");
 
+      const nameCandidates = [
+        message.member?.nickname,
+        message.author.globalName,
+        message.author.username,
+      ];
+
+      let safeUsername = "censored name";
+
+      for (const name of nameCandidates) {
+        if (
+          name &&
+          name.length >= 2 &&
+          name.length <= 32 &&
+          !/[@#:]|```|discord|clyde/i.test(name) &&
+          !/^(everyone|here)$/i.test(name)
+        ) {
+          safeUsername = name.trim();
+          break;
+        }
+      }
+
       webhookClient.send({
         content: `${replyText}\n${filteredContent}`,
-        username: message.member?.displayName || message.author.username,
+        username: safeUsername,
         avatarURL: message.author.displayAvatarURL(),
         files: message.attachments.map(att => att.url),
       });
