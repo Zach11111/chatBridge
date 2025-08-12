@@ -22,20 +22,20 @@ export default {
     }
 
     const channelId = channelText.slice(2, -1);
-    const serverId = message.guild.id;
+    const id = message.guild.id;
 
-    if (servers.some(s => s.serverId === serverId)) {
+    if (servers.some(s => s.id === id)) {
       return message.reply("This server is already linked.");
     }
 
-    const serverName = message.guild.name;
-    const server = client.guilds.cache.get(serverId);
+    const name = message.guild.name;
+    const server = client.guilds.cache.get(id);
     const channel = server.channels.cache.get(channelId);
     const webhook = await channel.createWebhook({ name: "ChatBridge Webhook" });
 
-    console.log(channelId, serverId, serverName, webhook.url);
-    await addServer(serverId, channelId, webhook.url, serverName);
-    addServerCache(serverId, channelId, webhook.url, serverName);
+    console.log(channelId, id, name, webhook.url);
+    await addServer(id, channelId, webhook.url, name);
+    addServerCache(id, channelId, webhook.url, name);
     message.reply("Channel linked successfully!");
   },
 };
