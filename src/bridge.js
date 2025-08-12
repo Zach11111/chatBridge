@@ -2,11 +2,26 @@ import Logger from "garylog";
 import { WebhookClient } from "discord.js";
 
 import { client } from "./client.js";
-import { servers } from "./utils.js";
+import { servers, users, addUserCache, getAuthorUsernameFromMessage } from "./utils.js";
+import { addUser, updateUsername } from "./db.js";
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
+  if (!users.some(u => u.id === message.author.id)) {
+    const name = getAuthorUsernameFromMessage(message);
+    await addUser(message.author.id, name);
+    addUserCache(message.author.id, name);
+  }
 
+  if (users.some(u => u.id === message.author.id && u.username !== getAuthorUsernameFromMessage(message))) {
+    const index = users.findIndex(u => u.id === message.author.id);
+    users[index].username = getAuthorUsernameFromMessage(message);
+    await updateUsername(message.author.id, users[index].username);
+  }
+
+  if (users.some(u => u.id === message.author.id && u.banned)) {
+    return;
+  }
   if (servers.some(s => s.channelId === message.channel.id)) {
     let replyText = "";
 
@@ -37,30 +52,11 @@ client.on("messageCreate", async (message) => {
         .replace(/@everyone/g, "@\u200Beveryone")
         .replace(/@here/g, "@\u200Bhere");
 
-      const nameCandidates = [
-        message.member?.nickname,
-        message.author.globalName,
-        message.author.username,
-      ];
-
-      let safeUsername = "censored name";
-
-      for (const name of nameCandidates) {
-        if (
-          name &&
-          name.length >= 2 &&
-          name.length <= 32 &&
-          !/[@#:]|```|discord|clyde/i.test(name) &&
-          !/^(everyone|here)$/i.test(name)
-        ) {
-          safeUsername = name.trim();
-          break;
-        }
-      }
+      const name = getAuthorUsernameFromMessage(message);
 
       webhookClient.send({
         content: `${replyText}\n${filteredContent}`,
-        username: safeUsername,
+        username: name,
         avatarURL: message.author.displayAvatarURL(),
         files: message.attachments.map(att => att.url),
       });
