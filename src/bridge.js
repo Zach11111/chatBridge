@@ -6,7 +6,6 @@ import { servers, users, addUserCache, getAuthorUsernameFromMessage } from "./ut
 import { addUser, updateUsername } from "./db.js";
 
 client.on("messageCreate", async (message) => {
-  console.log(message.content);
   if (message.author.bot) return;
   if (!users.some(u => u.id === message.author.id)) {
     const name = getAuthorUsernameFromMessage(message);
