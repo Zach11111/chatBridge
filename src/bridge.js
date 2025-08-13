@@ -19,9 +19,9 @@ client.on("messageCreate", async (message) => {
     await updateUsername(message.author.id, users[index].username);
   }
 
-  if (users.some(u => u.id === message.author.id && u.banned)) {
-    return;
-  }
+ // if (users.some(u => u.id === message.author.id && u.banned)) {
+ //   return;
+ // }
   if (servers.some(s => s.channelId === message.channel.id)) {
     let replyText = "";
 
