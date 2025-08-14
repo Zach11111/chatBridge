@@ -50,7 +50,7 @@ client.on("messageCreate", async (message) => {
 
       const webhookClient = new WebhookClient({ url: server.webhook });
 
-      let filteredContent = await filterMessage(message.content, client);
+      let filteredContent = await filterMessage(message.content);
 
       const name = getAuthorUsernameFromMessage(message);
 
