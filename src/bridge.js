@@ -48,10 +48,21 @@ client.on("messageCreate", async (message) => {
 
       const webhookClient = new WebhookClient({ url: server.webhook });
 
-      const filteredContent = message.content
+      let filteredContent = message.content
         .replace(/@everyone/g, "@\u200Beveryone")
-        .replace(/@here/g, "@\u200Bhere")
-        .replace(/^<@!?(\d+)>/g, (`@${await client.users.fetch("$1")?.username || "Unknown User"}`));
+        .replace(/@here/g, "@\u200Bhere");
+
+      const mentionRegex = /<@!?(\d+)>/g;
+      const matches = [...filteredContent.matchAll(mentionRegex)];
+      for (const match of matches) {
+        const userId = match[1];
+        let username = "Unknown User";
+        try {
+          const user = await client.users.fetch(userId);
+          username = user?.username || username;
+        } catch {}
+        filteredContent = filteredContent.replace(match[0], `@${username}`);
+      }
 
       const name = getAuthorUsernameFromMessage(message);
 
