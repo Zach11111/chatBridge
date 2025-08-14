@@ -11,11 +11,13 @@ export default {
       if (args.length < 1) {
         if (message.reference) {
           const reply = await message.channel.messages.fetch(message.reference.messageId);
-          const userId = users.find(u => u.username === reply.author.username).id;
+          const index = users.findIndex(u => u.username === reply.author.username);
+          const userId = users[index].id;
+          const username = users[index].username;
           console.log(userId);
           await banUser(userId);
           banUserCache(userId);
-          message.reply(`User ${user.username} has been banned from the bridge.`);
+          message.reply(`User ${username} has been banned from the bridge.`);
         }
       }
       const userText = args[0];

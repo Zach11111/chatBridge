@@ -11,10 +11,12 @@ export default {
       if (args.length < 1) {
         if (message.reference) {
           const reply = await client.channels.cache.get(message.channel.id).messages.fetch(message.reference.messageId);
-          const userId = reply.author.id;
+          const index = users.findIndex(u => u.username === reply.author.username);
+          const userId = users[index].id;
+          const username = users[index].username;
           await unbanUser(userId);
           unbanUserCache(userId);
-          message.reply(`User ${user.username} has been unbanned from the bridge.`);
+          message.reply(`User ${username} has been unbanned from the bridge.`);
         }
       }
       const userText = args[0];
