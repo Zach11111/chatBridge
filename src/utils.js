@@ -76,7 +76,7 @@ export function getAuthorUsernameFromMessage(message) {
 }
 
 export async function filterMessage(message) {
-  let filteredContent = message.content
+  let filteredContent = message
     .replace(/@everyone/g, "@\u200Beveryone")
     .replace(/@here/g, "@\u200Bhere");
   
