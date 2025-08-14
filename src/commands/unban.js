@@ -7,7 +7,7 @@ export default {
   name: "unban",
   description: "unban a user from the bridge",
   async execute(message, args) {
-    if (users.some(u => u.id === message.author.id && u.admin)) {
+    if (users.some(u => u.id === message.author.id && u.admin === 1)) {
       if (args.length < 1) {
         if (message.reference) {
           const reply = await client.channels.cache.get(message.channel.id).messages.fetch(message.reference.messageId);
