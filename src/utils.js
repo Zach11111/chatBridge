@@ -29,7 +29,7 @@ export function removeServerCache(id) {
 }
 
 export const users = await loadUserData();
-export function addUserCache(id, username, banned = true) {
+export function addUserCache(id, username, banned = 0) {
   users.push({
     id,
     username,
