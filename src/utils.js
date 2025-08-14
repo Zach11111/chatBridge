@@ -53,7 +53,6 @@ export function adminUserCache(id) {
 
 export function getAuthorUsernameFromMessage(message) {
   const nameCandidates = [
-    message.member?.nickname,
     message.author.globalName,
     message.author.username,
   ];
