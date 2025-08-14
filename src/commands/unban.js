@@ -16,7 +16,7 @@ export default {
           const username = users[index].username;
           await unbanUser(userId);
           unbanUserCache(userId);
-          message.reply(`User ${username} has been unbanned from the bridge.`);
+          return message.reply(`User ${username} has been unbanned from the bridge.`);
         }
       }
       const userText = args[0];

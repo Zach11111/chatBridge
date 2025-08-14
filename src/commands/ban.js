@@ -17,7 +17,7 @@ export default {
           console.log(userId);
           await banUser(userId);
           banUserCache(userId);
-          message.reply(`User ${username} has been banned from the bridge.`);
+          return message.reply(`User ${username} has been banned from the bridge.`);
         }
       }
       const userText = args[0];
