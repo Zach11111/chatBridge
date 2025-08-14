@@ -50,7 +50,8 @@ client.on("messageCreate", async (message) => {
 
       const filteredContent = message.content
         .replace(/@everyone/g, "@\u200Beveryone")
-        .replace(/@here/g, "@\u200Bhere");
+        .replace(/@here/g, "@\u200Bhere")
+        .replace(/^<@!?(\d+)>/g, (`@${client.users.cache.get("$1")?.username || "Unknown User"}`));
 
       const name = getAuthorUsernameFromMessage(message);
 
