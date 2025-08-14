@@ -39,17 +39,17 @@ export function addUserCache(id, username, banned = true) {
 
 export function banUserCache(id) {
   const index = users.findIndex(u => u.id === id);
-  users[index].banned = true;
+  users[index].banned = 1;
 }
 
 export function unbanUserCache(id) {
   const index = users.findIndex(u => u.id === id);
-  users[index].banned = false;
+  users[index].banned = 0;
 }
 
 export function adminUserCache(id) {
   const index = users.findIndex(u => u.id === id);
-  users[index].admin = true;
+  users[index].admin = 1;
 };
 
 export function getAuthorUsernameFromMessage(message) {
