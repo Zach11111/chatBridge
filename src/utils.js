@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 
+import { client } from "./client.js";
 import { loadServerData, loadUserData } from "./db.js";
 
 dotenv.config();
@@ -27,7 +28,7 @@ export function removeServerCache(id) {
   }
 }
 
-export const users = await loadUserData()
+export const users = await loadUserData();
 export function addUserCache(id, username, banned = true) {
   users.push({
     id,
@@ -72,4 +73,25 @@ export function getAuthorUsernameFromMessage(message) {
     }
   }
   return safeUsername;
+}
+
+export async function filterMessage(message) {
+  let filteredContent = message.content
+    .replace(/@everyone/g, "@\u200Beveryone")
+    .replace(/@here/g, "@\u200Bhere");
+  
+  const mentionRegex = /<@!?(\d+)>/g;
+  const matches = [...filteredContent.matchAll(mentionRegex)];
+  for (const match of matches) {
+    const userId = match[1];
+    let username = "Unknown User";
+    try {
+      const user = await client.users.fetch(userId);
+      username = user?.username || username;
+      // eslint-disable-next-line no-empty
+    } catch {}
+    filteredContent = filteredContent.replace(match[0], `@${username}`);
+  }
+
+  return filteredContent;
 }

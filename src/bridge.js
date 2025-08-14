@@ -2,7 +2,7 @@ import Logger from "garylog";
 import { WebhookClient } from "discord.js";
 
 import { client } from "./client.js";
-import { servers, users, addUserCache, getAuthorUsernameFromMessage } from "./utils.js";
+import { servers, users, addUserCache, getAuthorUsernameFromMessage, filterMessage } from "./utils.js";
 import { addUser, updateUsername } from "./db.js";
 
 client.on("messageCreate", async (message) => {
@@ -29,9 +29,11 @@ client.on("messageCreate", async (message) => {
       try {
         const referenced = await message.fetchReference();
         const replyAuthor = referenced.member?.displayName || referenced.author.username;
-        const rawContent = referenced.content || "[embed/attachment]";
+        let rawContent = referenced.content || "[embed/attachment]";
         const cleanedContent = rawContent.replace(/^`Replying to @.*?: ".*?"`\n?/s, "").trim();
-        const replyContent = cleanedContent.slice(0, 100);
+        let replyContent = cleanedContent.slice(0, 100);
+
+        replyContent = await filterMessage(replyContent);
 
         replyText = `\`Replying to @${replyAuthor}: "${replyContent}"\``;
       } catch (err) {
@@ -48,21 +50,7 @@ client.on("messageCreate", async (message) => {
 
       const webhookClient = new WebhookClient({ url: server.webhook });
 
-      let filteredContent = message.content
-        .replace(/@everyone/g, "@\u200Beveryone")
-        .replace(/@here/g, "@\u200Bhere");
-
-      const mentionRegex = /<@!?(\d+)>/g;
-      const matches = [...filteredContent.matchAll(mentionRegex)];
-      for (const match of matches) {
-        const userId = match[1];
-        let username = "Unknown User";
-        try {
-          const user = await client.users.fetch(userId);
-          username = user?.username || username;
-        } catch {}
-        filteredContent = filteredContent.replace(match[0], `@${username}`);
-      }
+      let filteredContent = await filterMessage(message.content, client);
 
       const name = getAuthorUsernameFromMessage(message);
 
