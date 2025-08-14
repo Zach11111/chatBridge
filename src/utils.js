@@ -27,8 +27,7 @@ export function removeServerCache(id) {
   }
 }
 
-export const users = await loadUserData();
-console.log(users)
+export const users = await loadUserData()
 export function addUserCache(id, username, banned = true) {
   users.push({
     id,
