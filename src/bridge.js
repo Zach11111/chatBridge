@@ -59,6 +59,8 @@ client.on("messageCreate", async (message) => {
         username: name,
         avatarURL: message.author.displayAvatarURL(),
         files: message.attachments.map(att => att.url),
+      }).catch((err) => {
+        Logger.error("Failed to send webhook for server: " + (server.name || "Unknown") + " (ID: " + server.id + ")", err);
       });
     }
   }
