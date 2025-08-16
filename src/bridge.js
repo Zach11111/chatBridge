@@ -59,14 +59,18 @@ client.on("messageCreate", async (message) => {
         username: name,
         avatarURL: message.author.displayAvatarURL(),
         files: message.attachments.map(att => att.url),
-      }).catch((err) => {
+      }).catch(async (err) => {
         Logger.error("Failed to send webhook for server: " + (server.name || "Unknown") + " (ID: " + server.id + ")", err);
+        if (err.code === 10015 || err.code === 50027) { 
+          await removeServer(server.id);
+          removeServerCache(server.id);
+        }
       });
     }
   }
 });
 
 client.on("guildDelete", async (guild) => {
-  removeServer(guild.id);
+  await removeServer(guild.id);
   removeServerCache(guild.id);
 });
