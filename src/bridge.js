@@ -2,8 +2,8 @@ import Logger from "garylog";
 import { WebhookClient } from "discord.js";
 
 import { client } from "./client.js";
-import { servers, users, addUserCache, getAuthorUsernameFromMessage, filterMessage } from "./utils.js";
-import { addUser, updateUsername } from "./db.js";
+import { servers, users, addUserCache, getAuthorUsernameFromMessage, filterMessage, removeServerCache } from "./utils.js";
+import { addUser, updateUsername, removeServer } from "./db.js";
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -62,4 +62,9 @@ client.on("messageCreate", async (message) => {
       });
     }
   }
+});
+
+client.on("guildDelete", async (guild) => {
+  removeServer(guild.id);
+  removeServerCache(guild.id);
 });
