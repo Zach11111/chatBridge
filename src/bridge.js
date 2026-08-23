@@ -31,7 +31,19 @@ client.on("messageCreate", async (message) => {
     let replyAuthor = "";
     let replyContent = "";
 
-    if (message.reference) {
+    let forwardText = "";
+    let forwardedImageUrl;
+    if (message.messageSnapshots?.size > 0) {
+      const snapshot = message.messageSnapshots.first();
+      if (snapshot) {
+        const rawContent = snapshot.content || "";
+        const filtered = await filterMessage(rawContent);
+        forwardText = `-# ↷ *Forwarded*\n${filtered}`;
+
+        const forwardedImage = snapshot.attachments?.find(a => a.contentType?.startsWith("image/"));
+        if (forwardedImage) forwardedImageUrl = forwardedImage.url;
+      }
+    } else if (message.reference) {
       try {
         referencedMessage = await message.fetchReference();
         replyAuthor = referencedMessage.member?.displayName || referencedMessage.author.username;
@@ -79,7 +91,8 @@ client.on("messageCreate", async (message) => {
       const name = getAuthorUsernameFromMessage(message);
       const stickers = message.stickers?.filter(s => s.type !== 1 && !s.url.endsWith(".json")).map(s => `${s.url}?size=160`) || [];
       const webhookFiles = message.attachments.map(att => att.url);
-      let finalContent = replyText ? `${replyText}\n${filteredContent}` : filteredContent;
+      if (forwardedImageUrl) webhookFiles.push(forwardedImageUrl);
+      let finalContent = `${replyText}${forwardText}\n${filteredContent}`;
 
       if (stickers.length > 0) {
         finalContent += `\n${stickers.join("\n")}`;
