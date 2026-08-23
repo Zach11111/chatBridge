@@ -4,7 +4,6 @@ import path from "path";
 import Logger from "garylog";
 import sqlite3 from "sqlite3";
 
-
 const dataDir = "./data";
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });

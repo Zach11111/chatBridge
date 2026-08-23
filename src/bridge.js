@@ -2,11 +2,12 @@ import { WebhookClient } from "discord.js";
 import Logger from "garylog";
 
 import { client } from "./client.js";
+import { recordMessageBridge } from "./messageLog.js";
 import { removeServer, servers } from "./servers.js";
 import { addUser, updateUsername, users } from "./users.js";
 import { getAuthorUsernameFromMessage, filterMessage } from "./utils.js";
-import { recordMessageBridge } from "./messageLog.js";
 import { PREFIX } from "./utils.js";
+import { getReplicateMessageId } from "./messageLog.js";
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -26,19 +27,18 @@ client.on("messageCreate", async (message) => {
     return;
   }
   if (servers.some(s => s.channelId === message.channel.id)) {
-    let replyText = "";
+    let referencedMessage = null;
+    let replyAuthor = "";
+    let replyContent = "";
 
     if (message.reference) {
       try {
-        const referenced = await message.fetchReference();
-        const replyAuthor = referenced.member?.displayName || referenced.author.username;
-        let rawContent = referenced.content || "[embed/attachment]";
+        referencedMessage = await message.fetchReference();
+        replyAuthor = referencedMessage.member?.displayName || referencedMessage.author.username;
+        let rawContent = referencedMessage.content || "[embed/attachment]";
         const cleanedContent = rawContent.replace(/^`Replying to @.*?: ".*?"`\n?/s, "").trim();
-        let replyContent = cleanedContent.slice(0, 100);
-
-        replyContent = await filterMessage(replyContent);
-
-        replyText = `\`Replying to @${replyAuthor}: "${replyContent}"\``;
+        let filtered = cleanedContent.slice(0, 100);
+        replyContent = await filterMessage(filtered);
       } catch (err) {
         Logger.warn("Failed to fetch reply reference:", err);
       }
@@ -58,15 +58,31 @@ client.on("messageCreate", async (message) => {
 
       const webhookClient = new WebhookClient({ url: server.webhook });
 
+      let replyText = "";
+      if (message.reference && referencedMessage) {
+        try {
+          const targetMessageId = await getReplicateMessageId(referencedMessage.id, server.channelId);
+          if (targetMessageId) {
+            const messageUrl = `https://discord.com/channels/${server.id}/${server.channelId}/${targetMessageId}`;
+            replyText = `\`Replying to @${replyAuthor}:\` ${messageUrl}`;
+          } else {
+            replyText = `\`Replying to @${replyAuthor}: "${replyContent}"\``;
+          }
+        } catch (err) {
+          Logger.warn("Failed to check message bridge log, using fallback:", err);
+          replyText = `\`Replying to @${replyAuthor}: "${replyContent}"\``;
+        }
+      }
+
       let filteredContent = await filterMessage(message.content);
 
       const name = getAuthorUsernameFromMessage(message);
-      const stickers = message.stickers?.filter(s => s.type !== 1 && !s.url.endsWith('.json')).map(s => `${s.url}?size=160`) || [];
+      const stickers = message.stickers?.filter(s => s.type !== 1 && !s.url.endsWith(".json")).map(s => `${s.url}?size=160`) || [];
       const webhookFiles = message.attachments.map(att => att.url);
-      let finalContent = `${replyText}\n${filteredContent}`;
+      let finalContent = replyText ? `${replyText}\n${filteredContent}` : filteredContent;
 
       if (stickers.length > 0) {
-        finalContent += `\n${stickers.join('\n')}`;
+        finalContent += `\n${stickers.join("\n")}`;
       }
 
       if (!finalContent.trim() && webhookFiles.length === 0) {

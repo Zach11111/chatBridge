@@ -29,6 +29,5 @@ export default {
     await banUser(userId);
     message.reply(`User ${user.username} has been banned from the bridge.`);
 
-
   },
 };

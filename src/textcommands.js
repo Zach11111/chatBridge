@@ -2,8 +2,9 @@ import fs from "fs";
 
 import { Events, Collection } from "discord.js";
 import Logger from "garylog";
-import { users } from "./users.js";
+
 import { client } from "./client.js";
+import { users } from "./users.js";
 import { PREFIX } from "./utils.js";
 
 client.textCommands = new Collection();
