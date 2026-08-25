@@ -41,5 +41,6 @@ export function removeServer(id) {
   if (index !== -1) {
     servers.splice(index, 1);
   }
+  db.run("DELETE FROM servers WHERE id = ?", [id])
 }
 
