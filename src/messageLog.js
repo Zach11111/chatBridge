@@ -16,7 +16,7 @@ export const MESSAGE_LOG_PATH = path.join(dataDir, "message-log.json");
 
 export let messageLog = [];
 
-function loadMessageLog() {
+export function loadMessageLog() {
   if (!fs.existsSync(MESSAGE_LOG_PATH)) {
     messageLog = [];
     return;
@@ -40,14 +40,8 @@ function persistMessageLog() {
   }
 }
 
-export function getMessageLog() {
-  loadMessageLog();
-  return [...messageLog];
-}
 
 export function recordMessageBridge(originalId, sourceChannelId, webhookChannelId, webhookMessageId) {
-  loadMessageLog();
-
   const existingEntry = messageLog.find((entry) => entry.original_id === originalId && entry.source_channel_id === sourceChannelId);
 
   if (existingEntry) {
@@ -69,8 +63,6 @@ export function recordMessageBridge(originalId, sourceChannelId, webhookChannelI
   persistMessageLog();
 }
 export async function deleteMessage(messageId, channelId) {
-  loadMessageLog();
-
   const entryIndex = messageLog.findIndex((entry) => {
     const isOriginal = entry.original_id === messageId && entry.source_channel_id === channelId;
     const isWebhook = Object.values(entry.webhook_messages).includes(messageId);
@@ -114,8 +106,6 @@ export async function deleteMessage(messageId, channelId) {
 }
 
 export function getReplicateMessageId(referencedMessageId, targetChannelId) {
-  loadMessageLog();
-
   const directEntry = messageLog.find((entry) => entry.original_id === referencedMessageId);
   if (directEntry && directEntry.webhook_messages[targetChannelId]) {
     return directEntry.webhook_messages[targetChannelId];
