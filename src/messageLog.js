@@ -5,7 +5,7 @@ import Logger from "garylog";
 
 import { client } from "./client.js";
 
-const MAX_MESSAGE_LOG_ENTRIES = 100;
+const MAX_MESSAGE_LOG_ENTRIES = 1000;
 const dataDir = "./data";
 
 if (!fs.existsSync(dataDir)) {
